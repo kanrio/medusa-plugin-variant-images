@@ -1,9 +1,10 @@
-import { useState } from 'react';
-import { Button, Container, DropdownMenu, Heading } from '@medusajs/ui';
-import { ProductDetailsWidgetProps, WidgetConfig } from '@medusajs/admin';
-import { ProductVariant } from '@medusajs/medusa';
-import { EllipsisHorizontal, PencilSquare } from '@medusajs/icons';
-import VariantsImagesModal from '../VariantsImages/VariantsImagesModal';
+import { useState } from "react";
+import { Button, Container, DropdownMenu, Heading } from "@medusajs/ui";
+import { ProductDetailsWidgetProps, WidgetConfig } from "@medusajs/admin";
+import { ProductVariant } from "@medusajs/medusa";
+import { EllipsisHorizontal, PencilSquare } from "@medusajs/icons";
+import VariantsImagesModal from "../VariantsImages/VariantsImagesModal";
+import { Thumbnail } from "../VariantsImages/components/common/thumbnail";
 
 const VariantsImagesWidget = ({
   product,
@@ -13,7 +14,7 @@ const VariantsImagesWidget = ({
     null
   );
   const [openedDialogType, setOpenedDialogType] = useState<
-    'media' | 'thumbnail' | null
+    "media" | "thumbnail" | null
   >(null);
 
   const handleClose = () => {
@@ -36,25 +37,27 @@ const VariantsImagesWidget = ({
               <div className="inter-base-semibold flex-1">{variant.title}</div>
               <DropdownMenu>
                 <DropdownMenu.Trigger asChild>
-                  <Button variant="secondary" format={'icon'}>
+                  <Button variant="secondary">
                     <EllipsisHorizontal />
                   </Button>
                 </DropdownMenu.Trigger>
                 <DropdownMenu.Content>
+                  {variant.images?.length > 0 && (
+                    <DropdownMenu.Item
+                      onClick={() => {
+                        setOpenedVariant(variant);
+                        setOpenedDialogType("thumbnail");
+                      }}
+                      className="gap-x-2"
+                    >
+                      <PencilSquare className="text-ui-fg-subtle" />
+                      Select Thumbnail
+                    </DropdownMenu.Item>
+                  )}
                   <DropdownMenu.Item
                     onClick={() => {
                       setOpenedVariant(variant);
-                      setOpenedDialogType('thumbnail');
-                    }}
-                    className="gap-x-2"
-                  >
-                    <PencilSquare className="text-ui-fg-subtle" />
-                    Edit Thumbnail
-                  </DropdownMenu.Item>
-                  <DropdownMenu.Item
-                    onClick={() => {
-                      setOpenedVariant(variant);
-                      setOpenedDialogType('media');
+                      setOpenedDialogType("media");
                     }}
                     className="gap-x-2"
                   >
@@ -65,30 +68,20 @@ const VariantsImagesWidget = ({
               </DropdownMenu>
             </div>
             <div className="flex flex-wrap items-center">
-              {variant.thumbnail ? (
-                <img
-                  src={variant.thumbnail}
-                  alt="Thumbnail"
+              <Thumbnail
+                src={variant.thumbnail}
+                alt={`Thumbnail image of ${variant.title}`}
+                className="mr-1 mt-1 h-20 w-20 object-cover"
+              />
+
+              {variant?.images?.map((image) => (
+                <Thumbnail
+                  key={image.id}
+                  src={image.url}
+                  alt={`Thumbnail image of ${variant.title}`}
                   className="mr-1 mt-1 h-20 w-20 object-cover"
                 />
-              ) : (
-                <div className="inter-regular mr-1 w-20 break-words">
-                  No thumbnail
-                </div>
-              )}
-
-              {variant.images.length ? (
-                variant.images.map((image) => (
-                  <img
-                    key={image.id}
-                    src={image.url}
-                    alt="Uploaded image"
-                    className="mr-1 mt-1 h-20 w-20 object-cover"
-                  />
-                ))
-              ) : (
-                <span className="inter-regular">No images...</span>
-              )}
+              ))}
             </div>
           </div>
         ))}
@@ -109,7 +102,7 @@ const VariantsImagesWidget = ({
 };
 
 export const config: WidgetConfig = {
-  zone: 'product.details.after',
+  zone: "product.details.after",
 };
 
 export default VariantsImagesWidget;
