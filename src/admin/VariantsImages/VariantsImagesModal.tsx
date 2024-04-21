@@ -1,17 +1,17 @@
-import { Product, ProductVariant } from '@medusajs/medusa';
-import { useEffect, useState } from 'react';
-import { useForm } from 'react-hook-form';
+import { Product, ProductVariant } from "@medusajs/medusa";
+import { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
 import {
   useAdminUpdateProduct,
   useAdminUpdateVariant,
   useMedusa,
-} from 'medusa-react';
-import { Button, FocusModal } from '@medusajs/ui';
-import { nestedForm } from './utils/nestedForm';
-import { prepareImages } from './utils/images';
+} from "medusa-react";
+import { Button, FocusModal } from "@medusajs/ui";
+import { nestedForm } from "./utils/nestedForm";
+import { prepareImages } from "./utils/images";
 import VariantsImagesMediaForm, {
   MediaFormType,
-} from './VariantsImagesMediaForm';
+} from "./VariantsImagesMediaForm";
 
 type Notify = {
   success: (title: string, message: string) => void;
@@ -33,7 +33,7 @@ type Props = {
   open: boolean;
   onClose: () => void;
   notify: Notify;
-  type: 'thumbnail' | 'media';
+  type: "thumbnail" | "media";
 };
 
 type MediaFormWrapper = {
@@ -50,8 +50,9 @@ const VariantsImagesModal = ({
 }: Props) => {
   const { client } = useMedusa();
   const [isUpdating, setIsUpdating] = useState(false);
+
   const adminUpdateVariant = useAdminUpdateVariant(product?.id);
-  const adminUpdateProduct = useAdminUpdateProduct(product?.id);
+
   const form = useForm<MediaFormWrapper>({
     defaultValues: getDefaultValues(product, variant, type),
   });
@@ -81,39 +82,27 @@ const VariantsImagesModal = ({
         client.admin.uploads
       );
     } catch (error) {
-      let errorMessage = 'Something went wrong while trying to upload images.';
+      let errorMessage = "Something went wrong while trying to upload images.";
       const response = (error as any).response as Response;
 
       if (response.status === 500) {
         errorMessage = `${errorMessage} You might not have a file service configured. Please contact your administrator.`;
       }
 
-      notify.error('Error', errorMessage);
+      notify.error("Error", errorMessage);
       return;
     }
     const urls = preppedImages.map((image) => image.url);
-    await adminUpdateProduct.mutate({ images: urls });
 
-    if (type === 'thumbnail') {
-      const thumbnail =
-        data.media.images.find((image) => image.selected)?.url || null;
+    const thumbnail =
+      data.media.images.find((image) => image.selected)?.url || null;
 
-      await adminUpdateVariant.mutate({
-        variant_id: variant.id,
-        // @ts-ignore
-        thumbnail,
-      });
-    } else {
-      const images = data.media.images
-        .map(({ selected }, i: number) => selected && urls[i])
-        .filter(Boolean);
-
-      await adminUpdateVariant.mutate({
-        variant_id: variant.id,
-        // @ts-ignore
-        images,
-      });
-    }
+    await adminUpdateVariant.mutate({
+      variant_id: variant.id,
+      // @ts-ignore
+      images: urls,
+      thumbnail: thumbnail,
+    });
 
     onClose();
     setIsUpdating(false);
@@ -142,7 +131,7 @@ const VariantsImagesModal = ({
               </p>
               <div>
                 <VariantsImagesMediaForm
-                  form={nestedForm(form, 'media')}
+                  form={nestedForm(form, "media")}
                   type={type}
                 />
               </div>
@@ -157,15 +146,16 @@ const VariantsImagesModal = ({
 const getDefaultValues = (
   product: Product,
   variant: ProductVariant,
-  type: 'thumbnail' | 'media'
+  type: "thumbnail" | "media"
 ): MediaFormWrapper => {
+  console.log(variant, type);
   return {
     media: {
       images:
-        product?.images?.map((image) => ({
+        variant?.images?.map((image) => ({
           url: image.url,
           selected:
-            type === 'thumbnail'
+            type === "thumbnail"
               ? variant.thumbnail === image.url
               : variant?.images?.some((vImage) => vImage.url === image.url) ??
                 false,
