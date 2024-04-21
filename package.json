@@ -11,6 +11,13 @@
     "dist"
   ],
   "author": "Andrii Nutskovskyi <andrii.nutskovskyi@gmail.com>",
+  "contributors": [
+    {
+      "name": "Anouar Kacem",
+      "email": "kcm.anouar@gmail.com",
+      "url": "https://github.com/kanrio"
+    }
+  ],
   "license": "MIT",
   "scripts": {
     "prepare": "cross-env NODE_ENV=production yarn run build",
